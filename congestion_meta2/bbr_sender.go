@@ -437,7 +437,10 @@ func (b *bbrSender) OnPacketSent(
 	bytes congestion.ByteCount,
 	isRetransmittable bool,
 ) {
-	b.pacer.SentPacket(sentTime, bytes)
+	// ACK-only packets bypass pacing and must not spend the data budget.
+	if isRetransmittable {
+		b.pacer.SentPacket(sentTime, bytes)
+	}
 
 	b.lastSentPacket = packetNumber
 	b.bytesInFlight = bytesInFlight
